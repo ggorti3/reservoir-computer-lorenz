@@ -140,6 +140,9 @@ def compare(predicted, actual, t, fontsize = 10):
         plt.ylabel(var, fontsize=fontsize)
         plt.xticks(fontsize=fontsize)
         plt.yticks(fontsize=fontsize)
+        if i == 0:
+            plt.legend(["truth", "prediction"])
+            plt.title("Truth vs Predicted Trajectory Comparison")
         i += 1
         
     plt.xlabel("Time", fontsize=fontsize)
