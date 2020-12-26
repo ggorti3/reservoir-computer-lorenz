@@ -170,7 +170,7 @@ def plot_poincare(predicted):
 if __name__ == "__main__":
     dt = 0.02
     train_data, val_data = get_lorenz_data(dt=dt)
-    network = ReservoirComputer(dim_reservoir=25, density=0.5)
+    network = ReservoirComputer(dim_reservoir=300, density=0.02)
     network.train(train_data)
     predicted = network.predict(val_data.shape[0])
     t_grid = np.linspace(0, val_data.shape[0] * dt, val_data.shape[0])
