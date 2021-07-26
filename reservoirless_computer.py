@@ -1,16 +1,14 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
-from utils import generate_reservoir, scale_res, lin_reg, sigmoid
+from utils import lin_reg, sigmoid
 
-# This file contains the ReservoirComputer class and necessary helper functions
-# The main method at the bottom contains a demo of the code, run this file in the terminal to check it out
-
-class ReservoirComputer():
-    def __init__(self, dim_system=3, dim_reservoir=300, sigma=0.1, rho=1.1, density=0.05):
+class ReservoirlessComputer():
+    def __init__(self, dim_system=3, dim_reservoir=300, sigma=0.1, beta=0.0001):
         self.dim_reservoir = dim_reservoir
         self.dim_system = dim_system
+        self.beta = beta
         self.r_state = np.zeros(dim_reservoir)
-        self.A = generate_reservoir(dim_reservoir, rho, density)
         self.W_in = 2 * sigma * (np.random.rand(dim_reservoir, 3) - 0.5)
         self.W_out = np.zeros((3, dim_reservoir))
     
@@ -20,7 +18,7 @@ class ReservoirComputer():
         """
         
         # We decided to use the sigmoid function instead of the tanh function. It seems to provide more consistent results
-        self.r_state = sigmoid(np.dot(self.A, self.r_state) + np.dot(self.W_in, u))
+        self.r_state = sigmoid(np.dot(self.W_in, u))
         
     def readout(self):
         """
@@ -41,7 +39,7 @@ class ReservoirComputer():
             R[:, i] = self.r_state
             x = traj[i]
             self.advance(x)
-        self.W_out = lin_reg(R, traj, 0.0001)
+        self.W_out = lin_reg(R, traj, self.beta)
         
     def predict(self, steps):
         """
@@ -59,15 +57,15 @@ class ReservoirComputer():
             predicted[i] = v
             self.advance(v)
         return predicted
-    
 
 if __name__ == "__main__":
     from data import get_lorenz_data
     from visualization import compare, plot_poincare
 
     dt = 0.02
-    train_data, val_data = get_lorenz_data(dt=dt)
-    network = ReservoirComputer(dim_reservoir=300, density=0.02)
+    train_data, val_data = get_lorenz_data(tf=250,dt=dt)
+
+    network = ReservoirlessComputer(dim_reservoir=300)
     network.train(train_data)
     predicted = network.predict(val_data.shape[0])
     t_grid = np.linspace(0, val_data.shape[0] * dt, val_data.shape[0])
