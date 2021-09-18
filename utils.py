@@ -45,3 +45,24 @@ def sigmoid(x):
     return np.where(x >= 0, 
                     1 / (1 + np.exp(-x)), 
                     np.exp(x) / (1 + np.exp(x)))
+
+def relu(x):
+    return np.where(x >= 0, x, 0)
+
+def correlation_distance(traj, x_idx):
+    num_gridpoints = traj.shape[1]
+    temp = np.tile(traj, (num_gridpoints, 1, 1))
+    temp2 = np.transpose(traj)
+    u_t_temp = temp2 - np.mean(temp, axis=2)
+    var_temp = np.sum(u_t_temp * u_t_temp, axis=0)
+
+    x_idx = x_idx % num_gridpoints
+    if x_idx == 0:
+        u_tau_temp = u_t_temp
+    else:
+        u_tau_temp = np.concatenate([u_t_temp[x_idx:], u_t_temp[:x_idx]], axis=0)
+    
+    covar_temp = np.sum(u_t_temp * u_tau_temp, axis=0)
+
+    correlation_distance_vec = covar_temp / var_temp
+    return correlation_distance_vec

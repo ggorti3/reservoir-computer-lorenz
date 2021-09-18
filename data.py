@@ -1,4 +1,7 @@
 import numpy as np
+import matlab.engine
+import matlab
+import random
 
 def RK4(f, r0, tf, dt):
     """Fourth-order Runge-Kutta integrator.
@@ -59,3 +62,22 @@ def get_lorenz_data(tf=250, dt=0.02, skip=25, split=0.8):
     val_data = traj[split_num:]
     
     return train_data, val_data
+
+def get_KS_data(num_gridpoints=128, tf=2000, dt=0.25, skip=25, split=0.8, seed=1):
+    random.seed(1)
+    u0_list = []
+    for i in range(num_gridpoints):
+        u0_list.append([2 * (random.random() - 0.5)])
+    u0 = matlab.double(u0_list)
+    eng = matlab.engine.start_matlab()
+    traj = eng.evolve_KS(u0, tf, dt, "full")
+    skip_steps = int(skip / dt)
+    traj = np.array(traj).transpose()[skip_steps:]
+
+    split_num = int(split * traj.shape[0])
+    train_data = traj[:split_num]
+    val_data = traj[split_num:]
+
+    return train_data, val_data
+    
+

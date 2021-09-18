@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import argrelextrema
+from utils import correlation_distance
 
 ### functions for plotting results ###
 
@@ -59,3 +60,27 @@ def plot_poincare(predicted):
     plt.title("Poincare Plot")
     plt.show()
     input("Press enter to exit")
+
+def plot_images(predicted, actual, num_preds):
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
+    vmin, vmax = -3, 3
+    ax1.imshow(actual.transpose()[:, :num_preds], cmap='coolwarm', vmin=vmin, vmax=vmax)
+    ax1.set_title("Truth")
+    ax2.imshow(predicted.transpose()[:, :num_preds], cmap='coolwarm', vmin=vmin, vmax=vmax)
+    ax2.set_title("Prediction")
+    ax3.imshow((actual - predicted).transpose()[:, :num_preds], cmap='coolwarm', vmin=vmin, vmax=vmax)
+    ax3.set_title("Difference")
+    plt.show()
+
+def plot_correlations(traj):
+    num_gridpoints = traj.shape[1]
+    my_range = range(num_gridpoints)
+    c_dists = []
+    for i in range(num_gridpoints):
+        c_vec = correlation_distance(traj, i)
+        c_dists.append(np.mean(c_vec))
+    fig, ax = plt.subplots(1)
+    ax.plot(my_range, c_dists)
+    ax.set_title("correlation at each distance")
+    ax.set_xticks(range(0, num_gridpoints + 1, 10))
+    plt.show()
