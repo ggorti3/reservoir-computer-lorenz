@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
-from utils import lin_reg, sigmoid, relu, correlation_distance
+from utils import lin_reg, sigmoid, relu, correlation_distance, random_combo, random_partition
 
 def random_combo(n, combo_len):
     assert combo_len < n
@@ -70,6 +70,7 @@ class ReservoirlessComputer():
             x = traj[i]
             self.advance(x)
         self.W_out = lin_reg(R, traj, self.beta)
+        return R
         
     def predict(self, steps):
         """
@@ -202,18 +203,20 @@ if __name__ == "__main__":
     from data import get_lorenz_data, get_KS_data
     from visualization import compare, plot_poincare, plot_images, plot_correlations
 
+
     dt = 0.25
+    pad = 7
     #train_data, val_data = get_lorenz_data(tf=250, dt=dt)
-    train_data, val_data = get_KS_data(num_gridpoints=100, tf=5000, dt=dt)
+    # train_data, val_data = get_KS_data(num_gridpoints=150, tf=5000, dt=dt)
     # plot_correlations(train_data)
     # exit()
     # train_subsample = get_subsample(train_data, 40, start_gridpoint=-30)
     # val_subsample = get_subsample(val_data, 40, start_gridpoint=-30)
-    train_subsample_0 = get_subsample(train_data, 40, start_gridpoint=-10)
-    train_subsample_1 = get_subsample(train_data, 40, start_gridpoint=10)
-    train_subsample_2 = get_subsample(train_data, 40, start_gridpoint=30)
-    train_subsample_3 = get_subsample(train_data, 40, start_gridpoint=50)
-    train_subsample_4 = get_subsample(train_data, 40, start_gridpoint=-30)
+    train_subsample_0 = get_subsample(train_data, 15 + 2 * pad, start_gridpoint=-1 * pad)
+    train_subsample_1 = get_subsample(train_data, 15 + 2 * pad, start_gridpoint=15 - pad)
+    train_subsample_2 = get_subsample(train_data, 15 + 2 * pad, start_gridpoint=2 * 15 - pad)
+    train_subsample_3 = get_subsample(train_data, 15 + 2 * pad, start_gridpoint=3 * 15 - pad)
+    train_subsample_4 = get_subsample(train_data, 15 + 2 * pad, start_gridpoint=-1 * (pad + 15))
     train_traj_list = [train_subsample_0, train_subsample_1, train_subsample_2, train_subsample_3, train_subsample_4]
     print("data generated. training network...")
 
@@ -242,8 +245,7 @@ if __name__ == "__main__":
     # predicted = network.predict(val_subsample.shape[0], val_subsample)
     # plot_images(predicted, val_subsample[:, pad:val_subsample.shape[1]-pad], 500)
 
-    pad = 10
-    net = AssistedReservoirlessComputer(dim_reservoir=8000, dim_system=20, activations=activations, pad=pad)
+    net = AssistedReservoirlessComputer(dim_reservoir=8000, dim_system=30, activations=activations, pad=pad)
     # net_0 = AssistedReservoirlessComputer(dim_reservoir=4400, dim_system=20, activations=activations, pad=pad)
     # net_1 = AssistedReservoirlessComputer(dim_reservoir=4400, dim_system=20, activations=activations, pad=pad)
     # net_2 = AssistedReservoirlessComputer(dim_reservoir=4400, dim_system=20, activations=activations, pad=pad)

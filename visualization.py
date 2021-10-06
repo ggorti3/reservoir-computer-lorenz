@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import argrelextrema
 from utils import correlation_distance
+from scipy.signal import argrelmin, argrelmax
 
 ### functions for plotting results ###
 
@@ -74,13 +75,26 @@ def plot_images(predicted, actual, num_preds):
 
 def plot_correlations(traj):
     num_gridpoints = traj.shape[1]
-    my_range = range(num_gridpoints)
+    my_range = np.array(range(num_gridpoints))
     c_dists = []
     for i in range(num_gridpoints):
         c_vec = correlation_distance(traj, i)
         c_dists.append(np.mean(c_vec))
+
+    c_dists = np.array(c_dists)
+
+    max_idxs = argrelmax(c_dists[:c_dists.shape[0]//2 + 1])[0]
+    min_idxs = argrelmin(c_dists[:c_dists.shape[0]//2 + 1])[0]
+    extrema = np.sort(np.concatenate([np.array([1]), c_dists[max_idxs], np.absolute(c_dists[min_idxs])]))[::-1]
+    extrema_idxs = np.sort(np.concatenate([np.array([0]), my_range[max_idxs], my_range[min_idxs]]))
+
+    coeffs = np.polyfit(extrema_idxs, np.log(extrema), 1)
+    print(coeffs)
+    envelope = np.exp(coeffs[0] * my_range)
+
     fig, ax = plt.subplots(1)
     ax.plot(my_range, c_dists)
+    ax.plot(my_range, envelope)
     ax.set_title("correlation at each distance")
     ax.set_xticks(range(0, num_gridpoints + 1, 10))
     plt.show()

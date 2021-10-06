@@ -79,5 +79,3 @@ def get_KS_data(num_gridpoints=128, tf=2000, dt=0.25, skip=25, split=0.8, seed=1
     val_data = traj[split_num:]
 
     return train_data, val_data
-    
-

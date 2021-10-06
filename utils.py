@@ -1,5 +1,26 @@
 import numpy as np
 import networkx as nx
+import random
+
+def random_combo(n, combo_len):
+    assert combo_len < n
+    assert combo_len > 0
+    my_range = list(range(n))
+    combo = []
+    for i in range(combo_len):
+        randi = random.randrange(len(my_range))
+        combo.append(my_range.pop(randi))
+    return combo
+
+def random_partition(n, num_cells):
+    assert num_cells > 0
+    assert num_cells <= n
+    my_range = list(range(n))
+    cells = [[] for j in range(num_cells)]
+    for i in range(n):
+        randi = random.randrange(len(my_range))
+        cells[i % num_cells].append(my_range.pop(randi))
+    return cells
 
 def generate_reservoir(dim_reservoir, rho, density):
     """
@@ -29,8 +50,8 @@ def lin_reg(R, U, beta=0.0001):
     Return an optimized matrix using ridge regression.
 
     Parameters
-    R: The generated reservoir states, stored as a (3, n) dimensional numpy array
-    U: The training trajectory, stored as a (n, 3) dimensional numpy array
+    R: The generated reservoir states, stored as a (dim_system, n) dimensional numpy array
+    U: The training trajectory, stored as a (n, dim_system) dimensional numpy array
     beta: regularization parameter
     
     Returns
@@ -38,7 +59,7 @@ def lin_reg(R, U, beta=0.0001):
     """
     
     Rt = np.transpose(R)
-    W_out = np.dot(np.dot(np.transpose(U), Rt), np.linalg.inv(np.dot(R, Rt) + beta * np.identity(R.shape[0])))
+    W_out = np.matmul(np.matmul(np.transpose(U), Rt), np.linalg.inv(np.matmul(R, Rt) + beta * np.identity(R.shape[0])))
     return W_out
 
 def sigmoid(x):
